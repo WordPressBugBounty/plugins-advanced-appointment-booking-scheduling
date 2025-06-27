@@ -1,0 +1,536 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+.wrap {
+    margin: 0;
+}
+.wrap.abp-page-wrapper {
+    margin-top: 0px;
+    padding: 20px;
+    background: #f1f1f1;
+}
+#wpcontent {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.wrap.abp-page-wrapper h1 {
+    text-align: left;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 9px 20px;
+}
+
+.search-container {
+    /* max-width: 600px;
+    margin: 0px auto; */
+    /* text-align: center; */
+}
+
+.header-main-block {
+    background-color: #fff;
+    padding: 10px 0px;
+    border-radius: 8px;
+}
+
+.search-container input {
+    background: #fff;
+    box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid #d3d3d3;
+}
+
+.abp-navbar-wrapper {
+    display: flex;
+    justify-content: space-between;
+    padding: 0px 12px;
+}
+
+select#api-response-dropdown {
+    max-width: 210px;
+}
+.search-wrapper-outer h1 {
+    padding: 25px 20px !important;
+    margin-bottom: 20px;
+    color: #fff;
+    background-color: #dd2590;
+    border-radius: 5px 5px 0px 0px;
+    font-size: 18px !important;
+}
+.search-wrapper-outer {
+    background: #fff;
+    border-radius: 10px;
+}
+
+body.toplevel_page_appointment-booking-admin {
+    background: #F7F7F9;
+}
+
+
+div#category-tabs button {
+    font-size: 18px;
+    border: none;
+    text-align: start;
+}
+div#category-tabs button:hover {
+    color: #dd2590;
+}
+
+
+.card-img-wrap {
+    overflow: hidden;
+    position: relative;
+}
+.card-img-wrap img {
+    object-fit: contain;
+    padding: 12px;
+}
+
+div#product-cards .card {
+    padding: 0px !important;
+}
+
+p.card-text {
+    text-align: left !important;
+}
+/* 
+.abp-button-wrapper {
+    top: 0;
+    right: 0;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+    width: max-content;
+    height: max-content;
+    z-index: 99;
+    display: none;
+} */
+/* .card:hover .card-img-wrap::after{
+    display: block;
+} */
+/* .card:hover .abp-button-wrapper {
+    display: block;
+} */
+
+/* .card-img-wrap::after {
+    transition: 0.3s ease-in-out;
+    content: "";
+    width: 100%;
+    height: 100%;
+    background: #000;
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.5;
+    display: none;
+} */
+
+.abp-button-wrapper {
+    display: flex;
+}
+.abp-button-wrapper a {
+    flex-grow: 1;
+}
+.abp-button-wrapper a.buy-now {
+    background-color: #f547ad;
+    border-color: #dd2590;
+    &:hover {
+        background-color: #dd2590;
+        border-color: #dd2590;
+    }
+}
+
+.abp-button-wrapper a.demo {
+    background-color: #99353f;
+    border-color: #99353f;
+    &:hover {
+        background-color: #9a2531;
+        border-color: #9a2531;
+    }
+}
+
+.abp-button-wrapper a:focus {
+    color: #fff;
+    box-shadow: unset;
+}
+
+.banner-section {
+    margin-top: 20px;
+}
+
+.banner-section img {
+    width: 100%;
+}
+
+
+button#load-more {
+    margin: 20px auto;
+    padding: 10px 22px;
+    border-radius: 6px !important;
+}
+
+button.btn.tab-btn.active::after {
+    content: "";
+    background: #dd2590;
+    height: 2px;
+    border-radius: 3px;
+    width: 80%;
+    position: absolute;
+    left: 0;
+    top: unset;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: translateX(10px);
+}
+
+button.btn.tab-btn:active {
+    border: none;
+    outline: none !important;
+}
+
+button.btn.tab-btn {
+    position: relative;
+}
+
+@media(max-width:1199px) {
+    .card-img-wrap {
+        max-height: 180px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    button.btn:nth-child(7) {
+        display: none !important;
+    }
+}
+
+@media(max-width:1024px) {
+
+    button.btn:nth-child(6),
+    button.btn:nth-child(5) {
+        display: none !important;
+    }
+}
+
+@media(max-width:991px) {
+    div#category-tabs {
+        display: none !important;
+    }
+
+    .abp-navbar-wrapper {
+        justify-content: flex-end;
+    }
+}
+
+@media(max-width:767px) {
+    .card {
+        margin: 0px auto;
+        max-width: 400px;
+    }
+}
+
+@media(max-width:575px) {
+    .search-container {
+        justify-content: center;
+        display: flex;
+    }
+
+    .abp-navbar-wrapper {
+        justify-content: center;
+    }
+
+    .abp-navbar-wrapper {
+        margin: 30px 0px 10px;
+    }
+}
+
+/* for loader */
+div#loader img {
+    width: 80px;
+    height: 80px;
+}
+.adv-app-book-notice-heading {
+    padding: 25px 70px;
+}
+.adv-app-book-notice-banner-wrap {
+    background-position: 0 60%;
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+.notice.adv-app-book {
+    padding-left: 0;
+    padding-right: 0 !important;
+}
+
+.adv-app-book-notice-heading h1 {
+    font-family: 'Bebas Neue';
+    font-weight: 400;
+    font-size: 79px;
+    color: #DD2590;
+}
+.adv-app-book-notice-heading p {
+    font-family: 'Montserrat';
+    font-weight: 600;
+    font-size: 16px;
+    background-color: #DD2590;
+    width: fit-content;
+    padding: 0px 20px;
+    color: #fff;
+    border-radius: 10px;
+    margin-top: -4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.adv-app-book-notice-btn a {
+    font-family: 'Montserrat';
+    text-decoration: unset;
+    background-color: #fff;
+    color: #DD2590;
+    padding: 10px;
+    display: block;
+    width: fit-content;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 30px;
+    border-radius: 7px;
+    margin-top: 15px;
+    border: 2px solid #dd2590;
+}
+.products-wrappre{
+    position: relative;
+}
+.loader-img-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 19rem;
+}
+#loader {
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    z-index: 9999;
+    width: 100%;
+    height: 100%;   
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+}
+#nav-tabContent #nav-dashboard h2 {
+    font-size: 22px;
+    margin: 20px 0px;
+}
+
+.dashboard-container .dashboard-item h3 {
+    font-size: 20px;
+}
+.adv-app-book-sub-head span {
+    font-family: 'Bebas Neue';
+    font-size: 30px;
+    line-height: 50px;
+    padding-top: 3px;
+}
+.dashboard-item p {
+    font-size: 18px !important;
+    margin-top: 20px;
+  }
+  .nav-link {
+    color: #000;
+  }
+  #nav-appointments p {
+    font-size: 16px;
+    margin: 20px 0px;
+  }
+/* end */
+#toplevel_page_appointment-booking-themes .wp-menu-name {
+    background: #DD2590;
+}
+#toplevel_page_appointment-booking-themes div.wp-menu-image:before, #toplevel_page_appointment-booking-themes .wp-menu-name {
+    color: #fff;
+}
+
+/* n css */
+
+#category-tabs{
+    display: flex;
+  flex-direction: column;
+}
+@media (max-width: 1399px) and (min-width: 1200px) {
+    .adv-app-book-notice-banner-wrap {
+        background-position: 22% 60%;
+    }
+}
+
+@media (max-width: 1199px) and (min-width: 992px) {
+    .adv-app-book-notice-banner-wrap {
+        background-position: 40% 60%;
+        background-size: cover;
+    }
+    .adv-app-book-notice-heading h1 {
+        font-size: 38px;
+    }
+    .adv-app-book-notice-heading p, .adv-app-book-notice-btn a {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 991px) and (min-width: 768px) {
+    .adv-app-book-notice-heading h1 {
+        font-size: 38px;
+    }
+    .adv-app-book-notice-heading p, .adv-app-book-notice-btn a {
+        font-size: 12px;
+    }
+    .adv-app-book-notice-banner-wrap {
+        background-position: 40% 60%;
+        background-size: cover;
+    }
+}
+@media (max-width: 767px){
+    .adv-app-book-notice-heading h1 {
+        font-size: 38px;
+        text-align: center;
+    }
+    .adv-app-book-notice-heading p, .adv-app-book-notice-btn a {
+        font-size: 12px;
+        margin: 10px auto;
+        text-align: center;
+    }
+    .adv-app-book-notice-banner-wrap {
+        background-position: 0% 100%;
+        background-size: cover;
+    }
+}
+
+
+/* dashboard tab css */
+
+.dashboard-container {
+    display: flex;
+    justify-content: start;
+    gap: 20px;
+    flex-wrap: wrap; /* Ensures responsiveness */
+    margin-top: 20px;
+}
+
+.dashboard-item {
+    background-color: #f1f1f1;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    min-width: 220px; /* Ensures a minimum width for responsiveness */
+    max-width: 250px; /* Limits max width */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dashboard-item:hover {
+    transform: translateY(-5px); /* Adds a little hover effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+}
+
+.dashboard-item h3 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.dashboard-item p {
+    font-size: 1.5em;
+    color: #007bff;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Responsiveness: Stack items on smaller screens */
+@media (max-width: 768px) {
+    .dashboard-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dashboard-item {
+        width: 80%; /* Ensures items fill the container on smaller screens */
+        margin-bottom: 20px;
+    }
+}
+
+
+/* nav tab css */
+
+/* General Navigation Styling */
+nav {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+.nav-tabs {
+    display: flex;
+    justify-content: start;
+    border-bottom: 2px solid #ddd;
+    padding: 0 20px;
+}
+
+.nav-link {
+    border: none;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    color: #555;
+    background-color: transparent;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 5px;
+}
+
+.nav-link:hover {
+    background-color: #f0f0f0;
+    color: #007bff;
+}
+
+.nav-link.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 3px 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Custom Active Tab Styling */
+.nav-link.active:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.nav-link[aria-selected="false"]:hover {
+    background-color: #f7f7f7;
+    color: #007bff;
+}
+
+/* Tablet and Mobile Responsiveness */
+@media (max-width: 768px) {
+    .nav-tabs {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-link {
+        width: 100%;
+        margin-bottom: 10px;
+        text-align: center;
+    }
+
+    .nav-link:last-child {
+        margin-bottom: 0;
+    }
+}
