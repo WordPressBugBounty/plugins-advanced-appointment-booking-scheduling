@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name:       Advanced Appointment Booking & Scheduling
+Plugin URI:
 Description:       Advanced Appointment Booking & Scheduling: Effortlessly manage appointments with a simple, user-friendly scheduling system.
-Version:           1.8
+Version:           1.9
 Requires at least: 5.2
 Requires PHP:      7.2
 Author:            themespride
 Author URI:        https://www.themespride.com/
-Plugin URI:
 Text Domain:       advanced-appointment-booking
 License:           GPL-2.0+
 */
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('ABP_VERSION', '1.8');
+define('ABP_VERSION', '1.9');
 define('ABP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ABP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('ABP_LICENCE_API_ENDPOINT', 'https://license.themespride.com/api/general/');
@@ -196,25 +196,27 @@ function abp_enqueue_assets()
     wp_enqueue_script('abp-script', plugins_url('/assets/js/booking.js', __FILE__), ['jquery'], $script_version, true);
 }
 
-add_action('admin_notices', 'adv_app_book_admin_notice_with_html');
-function adv_app_book_admin_notice_with_html()
-{
-    ?>
-    <div class="notice is-dismissible adv-app-book">
-        <div class="adv-app-book-notice-banner-wrap"
-            style="background-image: url(<?php echo esc_url(plugins_url('includes/images/ban-plain.png', __FILE__)); ?>)">
-            <div class="adv-app-book-notice-heading">
-                <h1 class="adv-app-book-main-head"><?php echo esc_html('WordPress Theme Bundle'); ?></h1>
-                <p class="adv-app-book-sub-head">
-                    <span><?php echo esc_html('120+'); ?></span><?php echo esc_html('  Premium WordPress Themes in 1 Bundle '); ?>
-                </p>
-                <div class="adv-app-book-notice-btn">
-                    <a class="adv-app-book-buy-btn" target="_blank"
-                        href="<?php echo esc_url(ABP_MAIN_URL . 'products/wordpress-theme-bundle'); ?>"><?php echo esc_html('Buy Now'); ?></a>
+function abp_promo_admin_banner_notice() { ?>
+    <div class="notice notice-info is-dismissible abp-promo-admin-banner">
+        <div class="abp-promo-banner-content-block">
+            <div class="abp-promo-banner-content-inner">
+                <div class="abp-promo-banner-content">
+                    <h3><?php echo esc_html('WordPress Theme Bundle'); ?></h3>
+                    <p class="abp-promo-banner-info"><?php echo esc_html('Get 120+ Premium WordPress Themes for Just $89!'); ?></p>
+                    <p class="abp-flash-code"><?php echo esc_html('Exclusive Flash Sale 🔥 Use Code: '); ?><strong id="abp-coupon"><?php echo esc_html('FLASH25'); ?></strong></p>
+                    <a href="<?php echo esc_attr( ABP_MAIN_URL . 'products/wordpress-theme-bundle' ); ?>" target="_blank"><?php echo esc_html('Buy Now'); ?></a>
+                </div>
+                <div class="abp-promo-discount">
+                    <div class="abp-extra">
+                        <span><?php echo esc_html('Extra'); ?></span>
+                        <span><?php echo esc_html('25%'); ?></span>
+                        <span><?php echo esc_html('OFF'); ?></span>
+                    </div>
                 </div>
             </div>
         </div>
+        <img src="<?php echo esc_url(plugins_url('includes/images/ban-plain.png', __FILE__)); ?>" alt="Theme Bundle Offer">
     </div>
     <?php
 }
-
+add_action('admin_notices', 'abp_promo_admin_banner_notice');

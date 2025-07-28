@@ -4,7 +4,7 @@ Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.8
+Stable tag: 1.9
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -101,3 +101,7 @@ These features ensure a comprehensive and efficient appointment booking experien
 = 1.8 - 2025-12-06 =
 - Added Staff tab with staff management features
 - Minor bug fixes
+
+= 1.9 - 2025-24-07 =
+- Added Upsell Banner
+- Minor Bug fixes
