@@ -18,6 +18,7 @@ class ABP_Admin
             remove_submenu_page('appointment-booking-admin', 'appointment-booking-admin');
         });
 
+        add_action('init', [$this,'abp_register_staff_role']);
     }
 
     public function abp_hide_notices_on_plugin_pages()
@@ -34,7 +35,7 @@ class ABP_Admin
         add_menu_page(
             'Our Templates',
             'Our Templates',
-            'manage_options',
+            'manage_appointments',
             'appointment-booking-themes',
             [$this, 'abp_render_admin_page'],
             'dashicons-admin-page',
@@ -46,7 +47,7 @@ class ABP_Admin
         add_menu_page(
             'Advanced Appointment Booking',
             'Appointments',  // Main menu name
-            'manage_options',
+            'manage_appointments',
             'appointment-booking-admin',
             [$this, 'abp_render_admin_page'],
             'dashicons-calendar-alt',
@@ -58,7 +59,7 @@ class ABP_Admin
             'appointment-booking-admin',
             'Bookings',
             'Bookings',
-            'manage_options',
+            'manage_appointments',
             'appointment-bookings',
             [$this, 'abp_render_bookings_page'] // Callback function
         );
@@ -67,10 +68,35 @@ class ABP_Admin
             'appointment-booking-admin',
             'Our Templates',
             'Our Templates',
-            'manage_options',
+            'manage_appointments',
             'appointment-booking-themes',
             [$this, 'abp_render_admin_page']
         );
+    }
+
+    function abp_register_staff_role() {
+        
+        if (!get_role('staff')) {
+            
+            add_role(
+                'staff',
+                __('Staff', 'abp'),
+                [
+                    'read' => true,
+                ]
+            );
+        }
+
+        // Add manage_appointments capability to Staff
+        $staff_role = get_role('staff');
+        if ($staff_role && !$staff_role->has_cap('manage_appointments')) {
+            $staff_role->add_cap('manage_appointments');
+        }
+
+        $admin_role = get_role('administrator');
+        if ($admin_role && !$admin_role->has_cap('manage_appointments')) {
+            $admin_role->add_cap('manage_appointments');
+        }
     }
 
     // Register shortcodes
@@ -127,6 +153,8 @@ class ABP_Admin
                         id="nav-appointments-tab" data-bs-toggle="tab" data-bs-target="#nav-appointments" type="button"
                         role="tab" aria-controls="nav-appointments"
                         aria-selected="<?php echo $active_tab == 'appointments' ? 'true' : 'false'; ?>">Appointments</button>
+
+                    <?php if ( ! in_array( 'staff', wp_get_current_user()->roles ) ) : ?>
                     <button class="nav-link <?php echo $active_tab == 'services' ? 'active' : ''; ?>" id="nav-services-tab"
                         data-bs-toggle="tab" data-bs-target="#nav-services" type="button" role="tab"
                         aria-controls="nav-services"
@@ -139,6 +167,8 @@ class ABP_Admin
                     <button class="nav-link <?php echo $active_tab == 'staff' ? 'active' : ''; ?>" id="nav-staff-tab"
                         data-bs-toggle="tab" data-bs-target="#nav-staff" type="button" role="tab" aria-controls="nav-staff"
                         aria-selected="<?php echo $active_tab == 'customers' ? 'true' : 'false'; ?>">Staff</button>
+                    <?php endif; ?>
+
                 </div>
             </nav>
 
@@ -152,6 +182,7 @@ class ABP_Admin
                     id="nav-appointments" role="tabpanel" aria-labelledby="nav-appointments-tab">
                     <?php $this->abp_render_appointments(); ?>
                 </div>
+
                 <div class="tab-pane fade <?php echo $active_tab == 'services' ? 'show active' : ''; ?>" id="nav-services"
                     role="tabpanel" aria-labelledby="nav-services-tab">
                     <?php include_once plugin_dir_path(__FILE__) . 'services.php'; ?>
@@ -182,6 +213,8 @@ class ABP_Admin
         if (!isset($_POST['book_appointment_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['book_appointment_nonce'])), 'book_appointment_action')) {
             wp_die('Invalid request.');
         }
+        
+        
 
         // Process form data
         global $wpdb;
@@ -198,6 +231,39 @@ class ABP_Admin
 
         if ($service) {
             $price = $service->price;
+
+            // * Any staff mapped to this service already booked?
+            $conflict = $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                    SELECT COUNT(*)
+                    FROM {$wpdb->prefix}appointment_booking b
+                    INNER JOIN {$wpdb->prefix}abp_staff_services ss
+                        ON b.service_id = ss.service_id
+                    WHERE ss.service_id = %d
+                    AND b.booking_date = %s
+                    AND b.booking_time = %s
+                    AND b.status IN ('pending','confirmed')
+                    ",
+                    $service_id,
+                    $booking_date,
+                    $booking_time
+                )
+            );
+            $post1 = get_page_by_path('book-appointment', OBJECT, 'page');
+
+            if ($conflict > 0) {
+                set_transient(
+                    'abp_booking_error',
+                    'This service is already booked for the selected date and time.',
+                    30
+                );
+                wp_redirect(get_permalink($post1->ID));
+                exit;
+            }
+
+
+
 
             // Insert appointment booking data
             $wpdb->insert(
@@ -228,7 +294,7 @@ class ABP_Admin
 
             // Check if insert was successful
             if ($wpdb->insert_id) {
-                wp_redirect(home_url(''));
+                wp_redirect( home_url( 'index.php/abp-bookings/' ) );
                 exit;
             } else {
                 wp_die('Failed to book the appointment.');
@@ -343,7 +409,7 @@ class ABP_Admin
     // Shortcode for Bookings page
     public function abp_bookings_page_shortcode()
     {
-        // If form is submitted, verify nonce first
+       
         if (isset($_POST['cancel_booking_id'])) {
             // Verify nonce in form handler
             if (!isset($_POST['book_appointment_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['book_appointment_nonce'])), 'book_appointment_action')) {
@@ -359,11 +425,11 @@ class ABP_Admin
 
                 $wpdb->update(
                     $table_name,
-                    array('status' => 'Canceled'),
+                    array('status' => 'canceled'),
                     array('id' => $booking_id, 'user_id' => $current_user_id)
                 );
 
-                echo '<div class="notice notice-success"><p>Your booking has been canceled.</p></div>';
+               wp_safe_redirect(add_query_arg('booking_status', 'canceled', get_permalink()));
             }
         }
 
@@ -398,7 +464,7 @@ class ABP_Admin
                 echo '</div>';
 
                 // Show "Cancel" button if the booking is not already canceled
-                if ($booking->status !== 'Canceled') {
+                if ($booking->status !== 'canceled') {
                     echo ' | <form method="POST" style="display:inline-block;">
                         <input type="hidden" name="cancel_booking_id" value="' . esc_attr($booking->id) . '">
                         ' . wp_nonce_field('book_appointment_action', 'book_appointment_nonce', true, false) . '
@@ -433,6 +499,16 @@ class ABP_Admin
             <?php wp_nonce_field('book_appointment_action', 'book_appointment_nonce'); ?>
             <input type="hidden" name="action" value="submit_appointment_booking"> <!-- Custom form action -->
 
+             <?php
+            //  Error Message
+            if ($error = get_transient('abp_booking_error')) :
+                delete_transient('abp_booking_error');
+            ?>
+                <p style="color:red;margin-top:10px;">
+                    <?php echo esc_html($error); ?>
+                </p>
+            <?php endif; ?>
+
             <h3>Select Service</h3>
             <select name="service_id" id="service-select" required>
                 <option value="">Select a service</option>
@@ -449,7 +525,7 @@ class ABP_Admin
             <input type="date" name="booking_date" required>
 
             <h3>Select Time</h3>
-            <input type="time" name="booking_time" required>
+            <input type="time"  id="booking_time"  step="900" name="booking_time" required>
 
             <h3>Enter Your Details</h3>
             <label for="name">Name:</label>
@@ -470,56 +546,100 @@ class ABP_Admin
             </div>
 
             <button type="submit" name="book_appointment">Book Appointment</button>
+           
         </form>
         <?php
 
         return ob_get_clean();
     }
-
-
-
-
     //end 
-
-
 
     //for dashboard 
     public function abp_render_dashboard()
     {
         global $wpdb;
-
-        $total_appointments = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}appointment_booking");
-        $approved_appointments = $wpdb->get_var($wpdb->prepare(
-            "
-        SELECT COUNT(*) FROM {$wpdb->prefix}appointment_booking WHERE status = %s",
-            'approved'
-        ));
-
-        $total_customers = $wpdb->get_var("SELECT COUNT(ID) FROM {$wpdb->users}");
-        $total_services = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}appointment_services");
+        $current_user = wp_get_current_user();
+        $appointments_table     = $wpdb->prefix . 'appointment_booking';
+        $services_table         = $wpdb->prefix . 'appointment_services';
+        $staff_table            = $wpdb->prefix . 'abp_staff';
+        $staff_services_table   = $wpdb->prefix . 'abp_staff_services';
 
 
-        echo '<div class="dashboard-container">
-        <div class="dashboard-item">
-            <h3>Total Appointments</h3>
-            <p id="total-appointments">' . esc_html($total_appointments ? $total_appointments : 0) . '</p>
-        </div>
+        // If user is staff -> show only their appointments
+        if ( in_array( 'staff', (array) $current_user->roles, true ) ) {
 
-        <div class="dashboard-item">
-            <h3>Total Services</h3>
-            <p id="total-services">' . esc_html($total_services ? $total_services : 0) . '</p>
-        </div>
+            $total_appointments = $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                    SELECT COUNT(DISTINCT ab.id)
+                    FROM {$appointments_table} ab
+                    INNER JOIN {$staff_services_table} ss ON ab.service_id = ss.service_id
+                    INNER JOIN {$staff_table} st ON ss.staff_id = st.id
+                    WHERE st.user_id = %d
+                    ",
+                    $current_user->ID
+                )
+            );
 
-        <div class="dashboard-item">
-            <h3>Approved Appointments</h3>
-            <p id="approved-appointments">' . esc_html($approved_appointments ? $approved_appointments : 0) . '</p>
-        </div>
+            $approved_appointments = $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                    SELECT COUNT(DISTINCT ab.id)
+                    FROM {$appointments_table} ab
+                    INNER JOIN {$staff_services_table} ss ON ab.service_id = ss.service_id
+                    INNER JOIN {$staff_table} st ON ss.staff_id = st.id
+                    WHERE st.user_id = %d AND ab.status = %s
+                    ",
+                    $current_user->ID,
+                    'approved'
+                )
+            );
 
-        <div class="dashboard-item">
-            <h3>Total Customers</h3>
-            <p id="total-customers">' . esc_html($total_customers ? $total_customers : 0) . '</p>
-        </div>
-    </div>';
+            // Staff don’t see customers / services
+            $total_customers = null;
+            $total_services  = null;
+
+        } else{
+
+            $total_appointments = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}appointment_booking");
+            $approved_appointments = $wpdb->get_var($wpdb->prepare(
+                "
+            SELECT COUNT(*) FROM {$wpdb->prefix}appointment_booking WHERE status = %s",
+                'approved'
+            ));
+
+            $total_customers = $wpdb->get_var("SELECT COUNT(ID) FROM {$wpdb->users}");
+            $total_services = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}appointment_services");
+        }
+
+
+        echo '<div class="dashboard-container">';
+
+        echo '<div class="dashboard-item">
+                <h3>Total Appointments</h3>
+                <p id="total-appointments">' . esc_html($total_appointments ? $total_appointments : 0) . '</p>
+            </div>';
+
+        if ( ! in_array( 'staff', (array) $current_user->roles, true ) ) {
+            echo '<div class="dashboard-item">
+                    <h3>Total Services</h3>
+                    <p id="total-services">' . esc_html($total_services ? $total_services : 0) . '</p>
+                </div>';
+        }
+
+        echo '<div class="dashboard-item">
+                <h3>Approved Appointments</h3>
+                <p id="approved-appointments">' . esc_html($approved_appointments ? $approved_appointments : 0) . '</p>
+            </div>';
+
+        if ( ! in_array( 'staff', (array) $current_user->roles, true ) ) {
+            echo '<div class="dashboard-item">
+                    <h3>Total Customers</h3>
+                    <p id="total-customers">' . esc_html($total_customers ? $total_customers : 0) . '</p>
+                </div>';
+        }
+
+        echo '</div>';
 
     }
 
@@ -531,6 +651,10 @@ class ABP_Admin
         global $wpdb;
 
         $appointments_table = $wpdb->prefix . 'appointment_booking';
+        $staff_table       = $wpdb->prefix . 'abp_staff';
+        $staff_services_table  = $wpdb->prefix . 'abp_staff_services';
+        $current_user       = wp_get_current_user();
+
 
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $appointments_table)) != $appointments_table) {
             echo '<p>No appointments found or table missing.</p>';
@@ -569,8 +693,26 @@ class ABP_Admin
 
             echo '<div class="updated notice is-dismissible"><p>Appointment deleted successfully.</p></div>';
         }
-
-        $appointments = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}appointment_booking");
+         
+        if ( in_array( 'staff', (array) $current_user->roles ) ) {
+            // Show only staff's own appointments
+            $appointments = $wpdb->get_results(
+                $wpdb->prepare(
+                    "
+                    SELECT DISTINCT ab.* 
+                    FROM {$appointments_table} ab
+                    INNER JOIN (
+                        {$staff_services_table} ss
+                        INNER JOIN {$staff_table} st ON ss.staff_id = st.id
+                    ) ON ab.service_id = ss.service_id
+                    WHERE st.user_id = %d
+                    ",
+                    $current_user->ID
+                )
+            );       
+        } else {
+            $appointments = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}appointment_booking");
+        }
         if (empty($appointments)) {
             echo '<p>No appointments found.</p>';
             return;
@@ -583,7 +725,9 @@ class ABP_Admin
                 <tr>
                     <th>ID</th>
                     <th>User</th>
-                    <th>Service</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Service Id</th>
                     <th>Booking Date</th>
                     <th>Booking Time</th>
                     <th>Status</th>
@@ -595,6 +739,8 @@ class ABP_Admin
                     <tr>
                         <td><?php echo esc_html($appointment->id); ?></td>
                         <td><?php echo esc_html($appointment->name); ?></td>
+                        <td><?php echo esc_html($appointment->email); ?></td>
+                        <td><?php echo esc_html($appointment->phone); ?></td>
                         <td><?php echo esc_html($appointment->service_id); ?></td> <!-- Service ID for now -->
                         <td><?php echo esc_html($appointment->booking_date); ?></td>
                         <td><?php echo esc_html($appointment->booking_time); ?></td>

@@ -104,8 +104,8 @@ if (isset($_GET['edit']) && isset($_GET['id']) && !empty($_GET['id'])) {
         </tr>
         <tr>
             <th scope="row"><label for="description">Description:</label></th>
-            <td><textarea name="description" id="description"
-                    required><?php echo esc_textarea($edit_service ? $edit_service->description : ''); ?></textarea>
+            <td><textarea name="description" id="description" style="min-width:230px;"
+                    required ><?php echo esc_textarea($edit_service ? $edit_service->description : ''); ?></textarea>
             </td>
         </tr>
     </table>

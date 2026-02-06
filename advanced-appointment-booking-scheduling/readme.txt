@@ -4,7 +4,7 @@ Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
 Tested up to: 6.8
 Requires PHP: 7.2
-Stable tag: 1.9
+Stable tag: 2.1
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,35 +73,65 @@ These features ensure a comprehensive and efficient appointment booking experien
 
 == Changelog ==
 
-= 1.0 - 2024-10-09 =
-- Initial release
+= 2.1 - 07-01-2026 =
+* Double booking prevention on same date/time.
+* Edge browser and css issued.
 
-= 1.1 - 2024-08-10 =
-- Bug fixes
+= 2.0 - 16-10-2025 =
+* Added appointment details and option to update status based on Staff role.
+* Fixed booking cancellation and redirect issue on the booking front page.
+* Minor bug fixes and improvements.
 
-= 1.2 - 2024-14-10 =
-- Bug fixes
-
-= 1.3 - 2024-03-12 =
-- Bug fixes
-
-= 1.4 - 2024-31-12 =
-- Bug fixes
-
-= 1.5 - 2024-31-12 =
-- Bug fixes
-
-= 1.6 - 2025-14-01 =
-- Bug fixes
-
-= 1.7 - 2025-10-04 =
-- Services Listing tab updated
-- Minor UI fixes
+= 1.9 - 2025-24-07 =
+- Added Upsell Banner
+- Minor Bug fixes
 
 = 1.8 - 2025-12-06 =
 - Added Staff tab with staff management features
 - Minor bug fixes
 
-= 1.9 - 2025-24-07 =
-- Added Upsell Banner
-- Minor Bug fixes
+= 1.8 - 2025-12-06 =
+- Added Staff tab with staff management features
+- Minor bug fixes
+
+= 1.7 - 2025-10-04 =
+- Services Listing tab updated
+- Minor UI fixes
+
+= 1.6 - 2025-14-01 =
+- Bug fixes
+
+= 1.5 - 2024-31-12 =
+- Bug fixes
+
+= 1.4 - 2024-31-12 =
+- Bug fixes
+
+= 1.3 - 2024-03-12 =
+- Bug fixes
+
+= 1.2 - 2024-14-10 =
+- Bug fixes
+
+= 1.1 - 2024-08-10 =
+- Bug fixes
+
+= 1.0 - 2024-10-09 =
+- Initial release
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -32,6 +32,7 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
     $email = sanitize_email($_POST['staff_email']);
     $phone = sanitize_text_field($_POST['staff_phone']);
     $services = isset($_POST['staff_services']) ? array_map('intval', $_POST['staff_services']) : [];
+    $staff_user = !empty($_POST['staff_user']) ? intval($_POST['staff_user']) : null;
 
     if (isset($_POST['staff_id']) && $_POST['staff_id']) {
         $staff_id = intval($_POST['staff_id']);
@@ -39,7 +40,8 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
         $wpdb->update($staff_table, [
             'name' => $name,
             'email' => $email,
-            'phone' => $phone
+            'phone' => $phone,
+            'user_id' => $staff_user
         ], ['id' => $staff_id]);
 
         $wpdb->delete($staff_services, ['staff_id' => $staff_id]);
@@ -61,7 +63,8 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
         $wpdb->insert($staff_table, [
             'name' => $name,
             'email' => $email,
-            'phone' => $phone
+            'phone' => $phone,
+            'user_id' => $staff_user
         ]);
 
         $staff_id = $wpdb->insert_id;
@@ -104,7 +107,7 @@ $staff_members = $wpdb->get_results("SELECT * FROM $staff_table ORDER BY id DESC
 ?>
 
 <div class="wrap">
-    <h2><?php echo $edit_staff ? 'Edit Staff' : 'Add New Staff'; ?></h2>
+    <h2><?php echo $edit_staff ? 'Edit Staff' : ''; ?></h2>
     <form method="post" class="abp-staff-form" style="max-width: 600px;">
         <?php wp_nonce_field('abp_add_staff_action', 'abp_add_staff_nonce'); ?>
         <?php if ($edit_staff): ?>
@@ -131,19 +134,63 @@ $staff_members = $wpdb->get_results("SELECT * FROM $staff_table ORDER BY id DESC
                         value="<?php echo esc_attr($edit_staff->phone ?? ''); ?>"></td>
             </tr>
             <tr>
+                <th><label for="staff_user">Select Staff User</label></th>
+                <td>
+                    <select name="staff_user" id="staff_user" style="min-width:350px;">
+                        <option value="">— Select Staff —</option>
+                        <?php
+                        $staff_users = get_users(['role' => 'staff']);
+                        foreach ($staff_users as $user) {
+                            echo '<option value="' . esc_attr($user->ID) . '" ' . selected($edit_staff->user_id ?? '', $user->ID, false) . '>';
+                            echo esc_html($user->display_name . ' (' . $user->user_email . ')');
+                            echo '</option>';
+                        }
+                        ?>
+                    </select>
+                    <p class="description">
+                    Choose an existing WordPress user with the "Staff" role.
+                    (Create user <a href="<?php echo admin_url('user-new.php'); ?>">here</a>.)
+                    </p>
+                </td>
+            </tr>
+
+
+            <?php
+            $assigned_service_ids = $wpdb->get_col(
+                $wpdb->prepare(
+                    "SELECT service_id FROM {$wpdb->prefix}abp_staff_services WHERE staff_id != %d",
+                    isset($staff_id) ? $staff_id : 0
+                )
+            );
+
+            $available_services = array_filter($all_services, function($service) use ($assigned_service_ids, $edit_services) {
+                return !in_array($service->id, $assigned_service_ids) || in_array($service->id, $edit_services);
+            });
+            ?>
+
+            <tr>
                 <th><label for="staff_services">Assign Services</label></th>
                 <td>
                     <select name="staff_services[]" id="staff_services" multiple
-                        style="min-width:300px; height: 100px;">
-                        <?php foreach ($all_services as $service): ?>
-                            <option value="<?php echo esc_attr($service->id); ?>" <?php selected(in_array($service->id, $edit_services)); ?>>
+                        style="min-width:350px; height: 100px;">
+                        <?php foreach ($available_services as $service): ?>
+                            <option value="<?php echo esc_attr($service->id); ?>"
+                                <?php selected(in_array($service->id, $edit_services)); ?>>
                                 <?php echo esc_html($service->service_name); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
+                     <p class="description">
+                        <?php if (empty($available_services)) : ?>
+                            If service list is empty, please create services first.
+                        <?php else : ?>
+                            Only not-assigned services are shown here.
+                        <?php endif; ?>
+                    </p>
                     <p class="description">Hold Ctrl (Windows) or Command (Mac) to select multiple options.</p>
                 </td>
             </tr>
+
         </table>
 
         <p>
@@ -163,6 +210,7 @@ $staff_members = $wpdb->get_results("SELECT * FROM $staff_table ORDER BY id DESC
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
+                    <th>WP User</th>
                     <th>Services</th>
                     <th>Created</th>
                     <th>Action</th>
@@ -178,12 +226,20 @@ $staff_members = $wpdb->get_results("SELECT * FROM $staff_table ORDER BY id DESC
                         }
                         return null;
                     }, $assigned_services));
+                    $user_display = '';
+                    if (!empty($staff->user_id)) {
+                        $wp_user = get_userdata($staff->user_id);
+                        if ($wp_user) {
+                            $user_display = $wp_user->display_name . ' (' . $wp_user->user_email . ')';
+                        }
+                    }
                     ?>
                     <tr>
                         <td><?php echo esc_html($staff->id); ?></td>
                         <td><?php echo esc_html($staff->name); ?></td>
                         <td><?php echo esc_html($staff->email); ?></td>
                         <td><?php echo esc_html($staff->phone); ?></td>
+                        <td><?php echo esc_html($user_display ?: '—'); ?></td>
                         <td><?php echo esc_html(implode(', ', $service_names)); ?></td>
                         <td><?php echo esc_html($staff->created_at); ?></td>
                         <td>

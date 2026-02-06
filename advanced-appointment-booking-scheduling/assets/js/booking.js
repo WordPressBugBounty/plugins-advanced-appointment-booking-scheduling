@@ -29,6 +29,14 @@ jQuery(document).ready(function($) {
     $('[name="booking_time"]').on('change', function() {
         $('#selected-time').text($(this).val());
     });
+
+
+    flatpickr("#booking_time", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: false,
+    });
 });
 
 

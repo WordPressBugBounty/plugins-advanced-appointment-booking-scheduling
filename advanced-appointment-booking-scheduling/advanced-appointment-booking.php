@@ -3,7 +3,7 @@
 Plugin Name:       Advanced Appointment Booking & Scheduling
 Plugin URI:
 Description:       Advanced Appointment Booking & Scheduling: Effortlessly manage appointments with a simple, user-friendly scheduling system.
-Version:           1.9
+Version:           2.1
 Requires at least: 5.2
 Requires PHP:      7.2
 Author:            themespride
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('ABP_VERSION', '1.9');
+define('ABP_VERSION', '2.1');
 define('ABP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ABP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('ABP_LICENCE_API_ENDPOINT', 'https://license.themespride.com/api/general/');
@@ -82,6 +82,7 @@ function abp_create_staff_table()
 
     $sql = "CREATE TABLE IF NOT EXISTS $table_name (
         id BIGINT(20) NOT NULL AUTO_INCREMENT,
+        user_id BIGINT(20) UNSIGNED NULL,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
         phone VARCHAR(20),
@@ -93,9 +94,30 @@ function abp_create_staff_table()
 
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
-}
 
+    //Extra safety add user_id  : 
+    $row = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'user_id'");
+    if (empty($row)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN user_id BIGINT(20) UNSIGNED NULL AFTER id");
+    }
+}
 register_activation_hook(__FILE__, 'abp_create_staff_table');
+
+function abp_alter_user_id_staff_table() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'abp_staff';
+
+    if (get_option('abp_staff_userid_column_added')) {
+        return;
+    }
+
+    $row = $wpdb->get_results("SHOW COLUMNS FROM $table_name LIKE 'user_id'");
+    if (empty($row)) {
+        $wpdb->query("ALTER TABLE $table_name ADD COLUMN user_id BIGINT(20) UNSIGNED NULL AFTER id");
+    }
+    update_option('abp_staff_userid_column_added', 1);
+}
+add_action('plugins_loaded', 'abp_alter_user_id_staff_table');
 // end
 
 
@@ -191,9 +213,24 @@ function abp_enqueue_assets()
     $style_version = filemtime(plugin_dir_path(__FILE__) . 'assets/css/abp-front.css');
     $script_version = filemtime(plugin_dir_path(__FILE__) . 'assets/js/booking.js');
 
+    wp_enqueue_style(
+        'flatpickr-css',
+        plugins_url('/assets/css/flatpickr.min.css', __FILE__),
+        [],
+        $style_version
+    );
+
+    wp_enqueue_script(
+        'flatpickr-js',
+        plugins_url('/assets/js/flatpickr.min.js', __FILE__),
+        [],
+        $script_version,
+        true
+    );
+
     wp_enqueue_style('abp-style', plugins_url('/assets/css/abp-front.css', __FILE__), [], $style_version);
 
-    wp_enqueue_script('abp-script', plugins_url('/assets/js/booking.js', __FILE__), ['jquery'], $script_version, true);
+    wp_enqueue_script('abp-script', plugins_url('/assets/js/booking.js', __FILE__), ['jquery', 'flatpickr-js'], $script_version, true);
 }
 
 function abp_promo_admin_banner_notice() { ?>

@@ -75,6 +75,7 @@ div#category-tabs button:hover {
 .card-img-wrap {
     overflow: hidden;
     position: relative;
+    max-height: 487px;
 }
 .card-img-wrap img {
     object-fit: contain;
@@ -499,6 +500,12 @@ nav {
     color: white;
     font-weight: 600;
     box-shadow: 0 3px 5px rgba(0, 123, 255, 0.2);
+}
+
+#product-cards .card-title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 /* Custom Active Tab Styling */
