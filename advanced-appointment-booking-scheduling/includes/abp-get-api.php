@@ -1,12 +1,17 @@
 <?php
 require_once '../../../../wp-load.php';
-
-header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['error' => 'Invalid request method']);
+if (!defined('ABSPATH')) {
     exit;
 }
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
+function abp_handle_fetch_api() {
+header('Content-Type: application/json');
+
+if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo wp_json_encode(['error' => 'Invalid request method']);
+    exit;
+}
+
 
 $postData = json_decode(file_get_contents('php://input'), true);
 
@@ -68,4 +73,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 }
 
 echo json_encode($data);
-?>
+}
+
+
+abp_handle_fetch_api();

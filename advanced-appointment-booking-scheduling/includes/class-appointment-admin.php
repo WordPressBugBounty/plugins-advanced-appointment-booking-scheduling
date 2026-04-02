@@ -5,6 +5,12 @@ if (!defined('ABSPATH')) {
 }
 class ABP_Admin
 {
+    // Helper method to sanitize table names
+    private function sanitize_table_name($table_name)
+    {
+        return esc_sql($table_name);
+    }
+
     // Constructor
     public function __construct()
     {
@@ -18,11 +24,12 @@ class ABP_Admin
             remove_submenu_page('appointment-booking-admin', 'appointment-booking-admin');
         });
 
-        add_action('init', [$this,'abp_register_staff_role']);
+        add_action('init', [$this, 'abp_register_staff_role']);
     }
 
     public function abp_hide_notices_on_plugin_pages()
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_GET['page']) && in_array($_GET['page'], ['appointment-booking-admin', 'appointment-bookings'])) {
 
         }
@@ -74,13 +81,14 @@ class ABP_Admin
         );
     }
 
-    function abp_register_staff_role() {
-        
+    function abp_register_staff_role()
+    {
+
         if (!get_role('staff')) {
-            
+
             add_role(
                 'staff',
-                __('Staff', 'abp'),
+                __('Staff', 'advanced-appointment-booking'),
                 [
                     'read' => true,
                 ]
@@ -154,19 +162,19 @@ class ABP_Admin
                         role="tab" aria-controls="nav-appointments"
                         aria-selected="<?php echo $active_tab == 'appointments' ? 'true' : 'false'; ?>">Appointments</button>
 
-                    <?php if ( ! in_array( 'staff', wp_get_current_user()->roles ) ) : ?>
-                    <button class="nav-link <?php echo $active_tab == 'services' ? 'active' : ''; ?>" id="nav-services-tab"
-                        data-bs-toggle="tab" data-bs-target="#nav-services" type="button" role="tab"
-                        aria-controls="nav-services"
-                        aria-selected="<?php echo $active_tab == 'services' ? 'true' : 'false'; ?>">Services</button>
-                    <button class="nav-link <?php echo $active_tab == 'customers' ? 'active' : ''; ?>" id="nav-customers-tab"
-                        data-bs-toggle="tab" data-bs-target="#nav-customers" type="button" role="tab"
-                        aria-controls="nav-customers"
-                        aria-selected="<?php echo $active_tab == 'customers' ? 'true' : 'false'; ?>">Customers</button>
+                    <?php if (!in_array('staff', wp_get_current_user()->roles)): ?>
+                        <button class="nav-link <?php echo $active_tab == 'services' ? 'active' : ''; ?>" id="nav-services-tab"
+                            data-bs-toggle="tab" data-bs-target="#nav-services" type="button" role="tab"
+                            aria-controls="nav-services"
+                            aria-selected="<?php echo $active_tab == 'services' ? 'true' : 'false'; ?>">Services</button>
+                        <button class="nav-link <?php echo $active_tab == 'customers' ? 'active' : ''; ?>" id="nav-customers-tab"
+                            data-bs-toggle="tab" data-bs-target="#nav-customers" type="button" role="tab"
+                            aria-controls="nav-customers"
+                            aria-selected="<?php echo $active_tab == 'customers' ? 'true' : 'false'; ?>">Customers</button>
 
-                    <button class="nav-link <?php echo $active_tab == 'staff' ? 'active' : ''; ?>" id="nav-staff-tab"
-                        data-bs-toggle="tab" data-bs-target="#nav-staff" type="button" role="tab" aria-controls="nav-staff"
-                        aria-selected="<?php echo $active_tab == 'customers' ? 'true' : 'false'; ?>">Staff</button>
+                        <button class="nav-link <?php echo $active_tab == 'staff' ? 'active' : ''; ?>" id="nav-staff-tab"
+                            data-bs-toggle="tab" data-bs-target="#nav-staff" type="button" role="tab" aria-controls="nav-staff"
+                            aria-selected="<?php echo $active_tab == 'customers' ? 'true' : 'false'; ?>">Staff</button>
                     <?php endif; ?>
 
                 </div>
@@ -213,10 +221,10 @@ class ABP_Admin
         if (!isset($_POST['book_appointment_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['book_appointment_nonce'])), 'book_appointment_action')) {
             wp_die('Invalid request.');
         }
-        
-        
 
-        // Process form data
+
+
+        // phpcs:disable WordPress.DB.DirectDatabaseQuery
         global $wpdb;
         $service_id = isset($_POST['service_id']) ? sanitize_text_field(wp_unslash($_POST['service_id'])) : '';
         $booking_date = isset($_POST['booking_date']) ? sanitize_text_field(wp_unslash($_POST['booking_date'])) : '';
@@ -226,8 +234,7 @@ class ABP_Admin
         $phone = isset($_POST['phone']) ? sanitize_text_field(wp_unslash($_POST['phone'])) : '';
 
         // Fetch service price
-        $table_name = $wpdb->prefix . 'appointment_services';
-        $service = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $service_id));
+        $service = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}appointment_services WHERE id = %d", $service_id));
 
         if ($service) {
             $price = $service->price;
@@ -258,7 +265,7 @@ class ABP_Admin
                     'This service is already booked for the selected date and time.',
                     30
                 );
-                wp_redirect(get_permalink($post1->ID));
+                wp_safe_redirect(get_permalink($post1->ID));
                 exit;
             }
 
@@ -294,7 +301,14 @@ class ABP_Admin
 
             // Check if insert was successful
             if ($wpdb->insert_id) {
-                wp_redirect( home_url( 'index.php/abp-bookings/' ) );
+                // wp_safe_redirect(home_url('index.php/abp-bookings/'));
+                $bookings_page = get_page_by_path('abp-bookings');
+
+                if ($bookings_page instanceof WP_Post) {
+                    wp_safe_redirect(get_permalink($bookings_page->ID));
+                    exit;
+                }
+                wp_safe_redirect(home_url());
                 exit;
             } else {
                 wp_die('Failed to book the appointment.');
@@ -308,45 +322,53 @@ class ABP_Admin
     public function abp_appointment_login_form_shortcode()
     {
         if (is_user_logged_in()) {
-            return '<p>You are already logged in.</p>';
+            return '<p>' . esc_html__('You are already logged in.', 'advanced-appointment-booking') . '</p>';
         }
 
         ob_start();
         ?>
         <form action="" method="post">
-            <label for="email">Email:</label>
+            <label for="email"><?php echo esc_html__('Email:', 'advanced-appointment-booking'); ?></label>
             <input type="email" name="log" id="email" required />
-            <label for="password">Password:</label>
+
+            <label for="password"><?php echo esc_html__('Password:', 'advanced-appointment-booking'); ?></label>
             <input type="password" name="pwd" id="password" required />
-            <!-- Add nonce field -->
+
             <?php wp_nonce_field('appointment_login_action', 'appointment_login_nonce'); ?>
-            <input type="submit" name="appointment_login" value="Login" />
+            <input type="submit" name="appointment_login"
+                value="<?php echo esc_attr__('Login', 'advanced-appointment-booking'); ?>" />
         </form>
         <?php
 
         if (isset($_POST['appointment_login'])) {
+            $nonce = isset($_POST['appointment_login_nonce']) ? sanitize_text_field(wp_unslash($_POST['appointment_login_nonce'])) : '';
 
-            $log = isset($_POST['log']) ? sanitize_text_field(wp_unslash($_POST['log'])) : '';
-            $pwd = isset($_POST['pwd']) ? sanitize_text_field(wp_unslash($_POST['pwd'])) : '';
-
-            $creds = array(
-                'user_login' => $log,
-                'user_password' => $pwd,
-                'remember' => true,
-            );
-
-            $user = wp_signon($creds, false);
-            if (is_wp_error($user)) {
-                echo '<p>Login failed. Please check your credentials.</p>';
+            if (!$nonce || !wp_verify_nonce($nonce, 'appointment_login_action')) {
+                echo '<p>' . esc_html__('Security check failed. Please try again.', 'advanced-appointment-booking') . '</p>';
             } else {
-                wp_redirect(home_url(''));
-                exit;
+
+                $log = isset($_POST['log']) ? sanitize_text_field(wp_unslash($_POST['log'])) : '';
+                $pwd = isset($_POST['pwd']) ? sanitize_text_field(wp_unslash($_POST['pwd'])) : '';
+
+                $creds = [
+                    'user_login' => $log,
+                    'user_password' => $pwd,
+                    'remember' => true,
+                ];
+
+                $user = wp_signon($creds, false);
+
+                if (is_wp_error($user)) {
+                    echo '<p>' . esc_html__('Login failed. Please check your credentials.', 'advanced-appointment-booking') . '</p>';
+                } else {
+                    wp_safe_redirect(home_url('/'));
+                    exit;
+                }
             }
         }
 
         return ob_get_clean();
     }
-
 
 
 
@@ -356,7 +378,6 @@ class ABP_Admin
         if (is_user_logged_in()) {
             return '<p>You are already logged in.</p>';
         }
-
         ob_start();
         ?>
         <form action="" method="post">
@@ -397,7 +418,7 @@ class ABP_Admin
             } else {
                 wp_set_current_user($user_id);
                 wp_set_auth_cookie($user_id);
-                wp_redirect(home_url(''));
+                wp_safe_redirect(home_url(''));
                 exit;
             }
         }
@@ -409,9 +430,7 @@ class ABP_Admin
     // Shortcode for Bookings page
     public function abp_bookings_page_shortcode()
     {
-       
         if (isset($_POST['cancel_booking_id'])) {
-            // Verify nonce in form handler
             if (!isset($_POST['book_appointment_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['book_appointment_nonce'])), 'book_appointment_action')) {
                 wp_die('Invalid request.');
             }
@@ -429,7 +448,7 @@ class ABP_Admin
                     array('id' => $booking_id, 'user_id' => $current_user_id)
                 );
 
-               wp_safe_redirect(add_query_arg('booking_status', 'canceled', get_permalink()));
+                wp_safe_redirect(add_query_arg('booking_status', 'canceled', get_permalink()));
             }
         }
 
@@ -462,14 +481,13 @@ class ABP_Admin
                 echo ' | Time: ' . esc_html($booking->booking_time);
                 echo ' | Status: ' . esc_html($booking->status);
                 echo '</div>';
-
-                // Show "Cancel" button if the booking is not already canceled
                 if ($booking->status !== 'canceled') {
                     echo ' | <form method="POST" style="display:inline-block;">
-                        <input type="hidden" name="cancel_booking_id" value="' . esc_attr($booking->id) . '">
-                        ' . wp_nonce_field('book_appointment_action', 'book_appointment_nonce', true, false) . '
-                        <input type="submit" value="' . esc_attr__('Cancel', 'advanced-appointment-booking') . '" class="button button-secondary" onclick="return confirm(\'' . esc_js(__('Are you sure you want to cancel this booking?')) . '\');">
-                    </form>';
+                            <input type="hidden" name="cancel_booking_id" value="' . esc_attr($booking->id) . '">';
+                    wp_nonce_field('book_appointment_action', 'book_appointment_nonce');
+                    echo '<input type="submit" value="' . esc_attr__('Cancel', 'advanced-appointment-booking') . '" class="button button-secondary" onclick="return confirm(\'' . esc_js(__('Are you sure you want to cancel this booking?', 'advanced-appointment-booking')) . '\');">
+                                    </form>';
+
                 } else {
                     echo ' | <span style="color: red;">' . esc_html__('Canceled', 'advanced-appointment-booking') . '</span>';
                 }
@@ -499,11 +517,11 @@ class ABP_Admin
             <?php wp_nonce_field('book_appointment_action', 'book_appointment_nonce'); ?>
             <input type="hidden" name="action" value="submit_appointment_booking"> <!-- Custom form action -->
 
-             <?php
+            <?php
             //  Error Message
-            if ($error = get_transient('abp_booking_error')) :
+            if ($error = get_transient('abp_booking_error')):
                 delete_transient('abp_booking_error');
-            ?>
+                ?>
                 <p style="color:red;margin-top:10px;">
                     <?php echo esc_html($error); ?>
                 </p>
@@ -525,7 +543,7 @@ class ABP_Admin
             <input type="date" name="booking_date" required>
 
             <h3>Select Time</h3>
-            <input type="time"  id="booking_time"  step="900" name="booking_time" required>
+            <input type="time" id="booking_time" step="900" name="booking_time" required>
 
             <h3>Enter Your Details</h3>
             <label for="name">Name:</label>
@@ -546,7 +564,7 @@ class ABP_Admin
             </div>
 
             <button type="submit" name="book_appointment">Book Appointment</button>
-           
+
         </form>
         <?php
 
@@ -554,27 +572,27 @@ class ABP_Admin
     }
     //end 
 
-    //for dashboard 
+    //for dashboard
     public function abp_render_dashboard()
     {
         global $wpdb;
         $current_user = wp_get_current_user();
-        $appointments_table     = $wpdb->prefix . 'appointment_booking';
-        $services_table         = $wpdb->prefix . 'appointment_services';
-        $staff_table            = $wpdb->prefix . 'abp_staff';
-        $staff_services_table   = $wpdb->prefix . 'abp_staff_services';
+        $appointments_table = $this->sanitize_table_name($wpdb->prefix . 'appointment_booking');
+        $services_table = $this->sanitize_table_name($wpdb->prefix . 'appointment_services');
+        $staff_table = $this->sanitize_table_name($wpdb->prefix . 'abp_staff');
+        $staff_services_table = $this->sanitize_table_name($wpdb->prefix . 'abp_staff_services');
 
 
         // If user is staff -> show only their appointments
-        if ( in_array( 'staff', (array) $current_user->roles, true ) ) {
+        if (in_array('staff', (array) $current_user->roles, true)) {
 
             $total_appointments = $wpdb->get_var(
                 $wpdb->prepare(
                     "
                     SELECT COUNT(DISTINCT ab.id)
-                    FROM {$appointments_table} ab
-                    INNER JOIN {$staff_services_table} ss ON ab.service_id = ss.service_id
-                    INNER JOIN {$staff_table} st ON ss.staff_id = st.id
+                    FROM {$wpdb->prefix}appointment_booking ab
+                    INNER JOIN {$wpdb->prefix}abp_staff_services ss ON ab.service_id = ss.service_id
+                    INNER JOIN {$wpdb->prefix}abp_staff st ON ss.staff_id = st.id
                     WHERE st.user_id = %d
                     ",
                     $current_user->ID
@@ -585,9 +603,9 @@ class ABP_Admin
                 $wpdb->prepare(
                     "
                     SELECT COUNT(DISTINCT ab.id)
-                    FROM {$appointments_table} ab
-                    INNER JOIN {$staff_services_table} ss ON ab.service_id = ss.service_id
-                    INNER JOIN {$staff_table} st ON ss.staff_id = st.id
+                    FROM {$wpdb->prefix}appointment_booking ab
+                    INNER JOIN {$wpdb->prefix}abp_staff_services ss ON ab.service_id = ss.service_id
+                    INNER JOIN {$wpdb->prefix}abp_staff st ON ss.staff_id = st.id
                     WHERE st.user_id = %d AND ab.status = %s
                     ",
                     $current_user->ID,
@@ -597,9 +615,9 @@ class ABP_Admin
 
             // Staff don’t see customers / services
             $total_customers = null;
-            $total_services  = null;
+            $total_services = null;
 
-        } else{
+        } else {
 
             $total_appointments = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}appointment_booking");
             $approved_appointments = $wpdb->get_var($wpdb->prepare(
@@ -620,7 +638,7 @@ class ABP_Admin
                 <p id="total-appointments">' . esc_html($total_appointments ? $total_appointments : 0) . '</p>
             </div>';
 
-        if ( ! in_array( 'staff', (array) $current_user->roles, true ) ) {
+        if (!in_array('staff', (array) $current_user->roles, true)) {
             echo '<div class="dashboard-item">
                     <h3>Total Services</h3>
                     <p id="total-services">' . esc_html($total_services ? $total_services : 0) . '</p>
@@ -632,7 +650,7 @@ class ABP_Admin
                 <p id="approved-appointments">' . esc_html($approved_appointments ? $approved_appointments : 0) . '</p>
             </div>';
 
-        if ( ! in_array( 'staff', (array) $current_user->roles, true ) ) {
+        if (!in_array('staff', (array) $current_user->roles, true)) {
             echo '<div class="dashboard-item">
                     <h3>Total Customers</h3>
                     <p id="total-customers">' . esc_html($total_customers ? $total_customers : 0) . '</p>
@@ -650,10 +668,10 @@ class ABP_Admin
     {
         global $wpdb;
 
-        $appointments_table = $wpdb->prefix . 'appointment_booking';
-        $staff_table       = $wpdb->prefix . 'abp_staff';
-        $staff_services_table  = $wpdb->prefix . 'abp_staff_services';
-        $current_user       = wp_get_current_user();
+        $appointments_table = $this->sanitize_table_name($wpdb->prefix . 'appointment_booking');
+        $staff_table = $this->sanitize_table_name($wpdb->prefix . 'abp_staff');
+        $staff_services_table = $this->sanitize_table_name($wpdb->prefix . 'abp_staff_services');
+        $current_user = wp_get_current_user();
 
 
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $appointments_table)) != $appointments_table) {
@@ -693,23 +711,23 @@ class ABP_Admin
 
             echo '<div class="updated notice is-dismissible"><p>Appointment deleted successfully.</p></div>';
         }
-         
-        if ( in_array( 'staff', (array) $current_user->roles ) ) {
+
+        if (in_array('staff', (array) $current_user->roles)) {
             // Show only staff's own appointments
             $appointments = $wpdb->get_results(
                 $wpdb->prepare(
                     "
-                    SELECT DISTINCT ab.* 
-                    FROM {$appointments_table} ab
+                    SELECT DISTINCT ab.*
+                    FROM {$wpdb->prefix}appointment_booking ab
                     INNER JOIN (
-                        {$staff_services_table} ss
-                        INNER JOIN {$staff_table} st ON ss.staff_id = st.id
+                        {$wpdb->prefix}abp_staff_services ss
+                        INNER JOIN {$wpdb->prefix}abp_staff st ON ss.staff_id = st.id
                     ) ON ab.service_id = ss.service_id
                     WHERE st.user_id = %d
                     ",
                     $current_user->ID
                 )
-            );       
+            );
         } else {
             $appointments = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}appointment_booking");
         }
@@ -766,6 +784,7 @@ class ABP_Admin
             </tbody>
         </table>
         <?php
+        // phpcs:enable
     }
 
 }

@@ -2,9 +2,9 @@
 Contributors: themespride
 Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.2
-Stable tag: 2.1
+Stable tag: 2.2
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,14 +54,21 @@ Features OF Advanced Appointment Booking & Scheduling
 7. Staff Scheduling: Manage staff availability and appointments, and assign bookings to specific team members.
 8. Booking Widget: Embed a user-friendly booking widget directly on your website for easy access.
 9. Payment Integration: Offer seamless payment options for appointment fees and deposits.
-10.Reporting & Analytics: Access detailed reports and analytics to track appointment trends and business performance.
-11.Multi-Language Support: Cater to a diverse client base with support for multiple languages.
-12.Customizable Time Zones: Handle appointments across different time zones effortlessly.
-13.Easy Integration: Integrate with other tools and plugins for enhanced functionality and workflow automation.
+10. Reporting & Analytics: Access detailed reports and analytics to track appointment trends and business performance.
+11. Multi-Language Support: Cater to a diverse client base with support for multiple languages.
+12. Customizable Time Zones: Handle appointments across different time zones effortlessly.
+13. Easy Integration: Integrate with other tools and plugins for enhanced functionality and workflow automation.
 
 These features ensure a comprehensive and efficient appointment booking experience for both businesses and clients.
 
 
+== Templates & Theme Compatibility ==
+
+This plugin also includes a dedicated Templates section where users can explore a curated collection of professionally designed [Best WordPress themes](https://www.themespride.com/collections/best-wordpress-themes). These themes are built to work smoothly with the Advanced Appointment Booking & Scheduling plugin, ensuring a consistent and reliable booking experience across different website layouts.
+
+Users can browse a variety of themes suitable for multiple business types, making it easier to set up a complete website alongside the booking system. Additionally, the [WordPress Theme Bundle](https://www.themespride.com/products/wordpress-theme-bundle) offers access to a large collection of themes in one package, providing flexibility for users managing multiple projects or niche websites.
+
+All themes are designed with compatibility in mind, allowing seamless integration with the plugin’s booking features, forms, and scheduling functionality. This helps users create a unified website experience without additional configuration or technical adjustments.
 
 
 == Installation ==
@@ -73,11 +80,14 @@ These features ensure a comprehensive and efficient appointment booking experien
 
 == Changelog ==
 
-= 2.1 - 07-01-2026 =
+= 2.2 - 2026-02-04 =
+* Minor bug fixes and improvements.
+
+= 2.1 - 2026-07-01 =
 * Double booking prevention on same date/time.
 * Edge browser and css issued.
 
-= 2.0 - 16-10-2025 =
+= 2.0 - 2025-16-10 =
 * Added appointment details and option to update status based on Staff role.
 * Fixed booking cancellation and redirect issue on the booking front page.
 * Minor bug fixes and improvements.

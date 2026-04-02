@@ -1,11 +1,16 @@
 <?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+// phpcs:disable WordPress.DB.DirectDatabaseQuery
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 global $wpdb;
 
 // Handle Delete Action
-if (isset($_GET['action'], $_GET['user_id']) && $_GET['action'] === 'delete' && current_user_can('delete_users')) {
+if (isset($_GET['action'], $_GET['user_id'], $_GET['_wpnonce']) && $_GET['action'] === 'delete' && current_user_can('delete_users')) {
     $user_id = intval($_GET['user_id']);
 
-    if (wp_verify_nonce($_GET['_wpnonce'], 'delete_customer_' . $user_id)) {
+    if (wp_verify_nonce(sanitize_text_field(wp_unslash($_GET['_wpnonce'])), 'delete_customer_' . $user_id)) {
         require_once ABSPATH . 'wp-admin/includes/user.php';
         wp_delete_user($user_id);
         echo '<div class="notice notice-success"><p>User deleted successfully.</p></div>';
@@ -51,3 +56,4 @@ if ($users) {
 } else {
     echo '<p>No customers found.</p>';
 }
+// phpcs:enable

@@ -3,6 +3,8 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+// phpcs:disable WordPress.DB.DirectDatabaseQuery
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals
 global $wpdb;
 $table_name = $wpdb->prefix . 'appointment_services';
 
@@ -162,4 +164,5 @@ if ($services) {
 } else {
     echo '<p>No services added yet.</p>';
 }
+// phpcs:enable
 ?>
