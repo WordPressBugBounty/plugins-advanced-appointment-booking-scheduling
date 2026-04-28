@@ -111,7 +111,7 @@ if (isset($_GET['edit']) && isset($_GET['id']) && !empty($_GET['id'])) {
             </td>
         </tr>
     </table>
-    <p><input type="submit" class="button button-primary"
+    <p><input type="submit" class="button abp-btn-primary"
             value="<?php echo $edit_service ? 'Update Service' : 'Add Service'; ?>"></p>
 </form>
 
@@ -145,7 +145,7 @@ if ($services) {
 
             <td>
                 
-                <a href="' . esc_url(admin_url('admin.php?page=appointment-bookings&tab=services&edit=1&id=' . esc_attr($service->id))) . '" class="button button-primary">Edit</a>
+                <a href="' . esc_url(admin_url('admin.php?page=appointment-bookings&tab=services&edit=1&id=' . esc_attr($service->id))) . '" class="button abp-btn-primary">Edit</a>
 
 
                 <form method="POST" style="display:inline; margin-left: 5px;">

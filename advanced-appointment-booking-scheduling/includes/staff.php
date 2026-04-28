@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 
 global $wpdb;
 
-$staff_table    = $wpdb->prefix . 'abp_staff';
+$staff_table = $wpdb->prefix . 'abp_staff';
 $services_table = $wpdb->prefix . 'appointment_services';
 $staff_services = $wpdb->prefix . 'abp_staff_services';
 
@@ -34,12 +34,14 @@ $wpdb->query(
 | Helper Functions
 |--------------------------------------------------------------------------
 */
-function abp_get_all_services() {
+function abp_get_all_services()
+{
     global $wpdb;
     return $wpdb->get_results("SELECT * FROM {$wpdb->prefix}appointment_services");
 }
 
-function abp_get_services_for_staff($staff_id) {
+function abp_get_services_for_staff($staff_id)
+{
     global $wpdb;
     return $wpdb->get_col(
         $wpdb->prepare(
@@ -83,9 +85,9 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
         $staff_id = intval(wp_unslash($_POST['staff_id']));
 
         $wpdb->update($staff_table, [
-            'name'    => $name,
-            'email'   => $email,
-            'phone'   => $phone,
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
             'user_id' => $staff_user
         ], ['id' => $staff_id]);
 
@@ -93,7 +95,7 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
 
         foreach ($services as $service_id) {
             $wpdb->insert($staff_services, [
-                'staff_id'   => $staff_id,
+                'staff_id' => $staff_id,
                 'service_id' => $service_id
             ]);
         }
@@ -101,15 +103,15 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
         echo '<div class="updated notice is-dismissible"><p>Staff updated successfully.</p></div>';
 
         unset($_GET['edit_staff']);
-        $edit_staff    = null;
+        $edit_staff = null;
         $edit_services = [];
 
     } else {
 
         $wpdb->insert($staff_table, [
-            'name'    => $name,
-            'email'   => $email,
-            'phone'   => $phone,
+            'name' => $name,
+            'email' => $email,
+            'phone' => $phone,
             'user_id' => $staff_user
         ]);
 
@@ -117,7 +119,7 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
 
         foreach ($services as $service_id) {
             $wpdb->insert($staff_services, [
-                'staff_id'   => $staff_id,
+                'staff_id' => $staff_id,
                 'service_id' => $service_id
             ]);
         }
@@ -125,7 +127,7 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
         echo '<div class="updated notice is-dismissible"><p>Staff added successfully.</p></div>';
 
         unset($_GET['edit_staff']);
-        $edit_staff    = null;
+        $edit_staff = null;
         $edit_services = [];
     }
 }
@@ -150,7 +152,7 @@ if (!empty($_GET['delete_staff']) && is_numeric($_GET['delete_staff'])) {
 | Edit Mode
 |--------------------------------------------------------------------------
 */
-$edit_staff    = null;
+$edit_staff = null;
 $edit_services = [];
 
 if (!empty($_GET['edit_staff']) && is_numeric($_GET['edit_staff'])) {
@@ -165,7 +167,7 @@ if (!empty($_GET['edit_staff']) && is_numeric($_GET['edit_staff'])) {
     $edit_services = abp_get_services_for_staff($edit_id);
 }
 // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$all_services  = abp_get_all_services();
+$all_services = abp_get_all_services();
 $staff_members = $wpdb->get_results("SELECT * FROM $staff_table ORDER BY id DESC");
 
 /*
@@ -181,7 +183,7 @@ $current_tab = isset($_GET['tab'])
 <div class="wrap">
     <h2><?php echo $edit_staff ? 'Edit Staff' : ''; ?></h2>
 
-    <form method="post" class="abp-staff-form" style="max-width: 600px;">
+    <form method="post" class="abp-staff-form" style="">
         <?php wp_nonce_field('abp_add_staff_action', 'abp_add_staff_nonce'); ?>
 
         <?php if ($edit_staff): ?>
@@ -230,35 +232,35 @@ $current_tab = isset($_GET['tab'])
                 </td>
             </tr>
 
-<?php
-$assigned_service_ids = $wpdb->get_col(
-    $wpdb->prepare(
-        "SELECT service_id FROM {$wpdb->prefix}abp_staff_services WHERE staff_id != %d",
-        isset($staff_id) ? $staff_id : 0
-    )
-);
+            <?php
+            $assigned_service_ids = $wpdb->get_col(
+                $wpdb->prepare(
+                    "SELECT service_id FROM {$wpdb->prefix}abp_staff_services WHERE staff_id != %d",
+                    isset($staff_id) ? $staff_id : 0
+                )
+            );
 
-$available_services = array_filter($all_services, function($service) use ($assigned_service_ids, $edit_services) {
-    return !in_array($service->id, $assigned_service_ids) || in_array($service->id, $edit_services);
-});
-?>
+            $available_services = array_filter($all_services, function ($service) use ($assigned_service_ids, $edit_services) {
+                return !in_array($service->id, $assigned_service_ids) || in_array($service->id, $edit_services);
+            });
+            ?>
 
             <tr>
                 <th><label for="staff_services">Assign Services</label></th>
                 <td>
-                    <select name="staff_services[]" id="staff_services" multiple style="min-width:350px; height: 100px;">
+                    <select name="staff_services[]" id="staff_services" multiple
+                        style="min-width:350px; height: 100px;">
                         <?php foreach ($available_services as $service): ?>
-                            <option value="<?php echo esc_attr($service->id); ?>"
-                                <?php selected(in_array($service->id, $edit_services)); ?>>
+                            <option value="<?php echo esc_attr($service->id); ?>" <?php selected(in_array($service->id, $edit_services)); ?>>
                                 <?php echo esc_html($service->service_name); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
 
                     <p class="description">
-                        <?php if (empty($available_services)) : ?>
+                        <?php if (empty($available_services)): ?>
                             If service list is empty, please create services first.
-                        <?php else : ?>
+                        <?php else: ?>
                             Only not-assigned services are shown here.
                         <?php endif; ?>
                     </p>
@@ -269,10 +271,8 @@ $available_services = array_filter($all_services, function($service) use ($assig
         </table>
 
         <p>
-            <input type="submit"
-                name="<?php echo $edit_staff ? 'abp_update_staff' : 'abp_add_staff'; ?>"
-                class="button button-primary"
-                value="<?php echo $edit_staff ? 'Update Staff' : 'Add Staff Member'; ?>">
+            <input type="submit" name="<?php echo $edit_staff ? 'abp_update_staff' : 'abp_add_staff'; ?>"
+                class="button abp-btn-primary" value="<?php echo $edit_staff ? 'Update Staff' : 'Add Staff Member'; ?>">
         </p>
     </form>
 
@@ -280,69 +280,70 @@ $available_services = array_filter($all_services, function($service) use ($assig
 
     <h2>All Staff Members</h2>
 
-<?php if (!empty($staff_members)): ?>
-<table class="widefat striped">
-<thead>
-<tr>
-<th>ID</th>
-<th>Name</th>
-<th>Email</th>
-<th>Phone</th>
-<th>WP User</th>
-<th>Services</th>
-<th>Created</th>
-<th>Action</th>
-</tr>
-</thead>
-<tbody>
+    <?php if (!empty($staff_members)): ?>
+        <table class="widefat striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>WP User</th>
+                    <th>Services</th>
+                    <th>Created</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
 
-<?php foreach ($staff_members as $staff):
+                <?php foreach ($staff_members as $staff):
 
-    $assigned_services = abp_get_services_for_staff($staff->id);
+                    $assigned_services = abp_get_services_for_staff($staff->id);
 
-    $service_names = array_filter(array_map(function ($sid) use ($all_services) {
-        foreach ($all_services as $srv) {
-            if ((int) $srv->id === (int) $sid) {
-                return $srv->service_name;
-            }
-        }
-        return null;
-    }, $assigned_services));
+                    $service_names = array_filter(array_map(function ($sid) use ($all_services) {
+                        foreach ($all_services as $srv) {
+                            if ((int) $srv->id === (int) $sid) {
+                                return $srv->service_name;
+                            }
+                        }
+                        return null;
+                    }, $assigned_services));
 
-    $user_display = '';
-    if (!empty($staff->user_id)) {
-        $wp_user = get_userdata($staff->user_id);
-        if ($wp_user) {
-            $user_display = $wp_user->display_name . ' (' . $wp_user->user_email . ')';
-        }
-    }
-?>
+                    $user_display = '';
+                    if (!empty($staff->user_id)) {
+                        $wp_user = get_userdata($staff->user_id);
+                        if ($wp_user) {
+                            $user_display = $wp_user->display_name . ' (' . $wp_user->user_email . ')';
+                        }
+                    }
+                    ?>
 
-<tr>
-<td><?php echo esc_html($staff->id); ?></td>
-<td><?php echo esc_html($staff->name); ?></td>
-<td><?php echo esc_html($staff->email); ?></td>
-<td><?php echo esc_html($staff->phone); ?></td>
-<td><?php echo esc_html($user_display ?: '—'); ?></td>
-<td><?php echo esc_html(implode(', ', $service_names)); ?></td>
-<td><?php echo esc_html($staff->created_at); ?></td>
-<td>
-<a href="<?php echo esc_url(add_query_arg(['tab' => 'staff', 'edit_staff' => $staff->id])); ?>" class="button">Edit</a>
-<a href="<?php echo esc_url(add_query_arg(['tab' => 'staff', 'delete_staff' => $staff->id])); ?>"
-   class="button button-small"
-   onclick="return confirm('Are you sure you want to delete this staff member?');">
-   Delete
-</a>
-</td>
-</tr>
+                    <tr>
+                        <td><?php echo esc_html($staff->id); ?></td>
+                        <td><?php echo esc_html($staff->name); ?></td>
+                        <td><?php echo esc_html($staff->email); ?></td>
+                        <td><?php echo esc_html($staff->phone); ?></td>
+                        <td><?php echo esc_html($user_display ?: '—'); ?></td>
+                        <td><?php echo esc_html(implode(', ', $service_names)); ?></td>
+                        <td><?php echo esc_html($staff->created_at); ?></td>
+                        <td>
+                            <a href="<?php echo esc_url(add_query_arg(['tab' => 'staff', 'edit_staff' => $staff->id])); ?>"
+                                class="abp-btn-primary">Edit</a>
+                            <a href="<?php echo esc_url(add_query_arg(['tab' => 'staff', 'delete_staff' => $staff->id])); ?>"
+                                class="abp-btn-secondary"
+                                onclick="return confirm('Are you sure you want to delete this staff member?');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
 
-<?php endforeach; ?>
+                <?php endforeach; ?>
 
-</tbody>
-</table>
-<?php else: ?>
-<p>No staff members found.</p>
-<?php endif; ?>
+            </tbody>
+        </table>
+    <?php else: ?>
+        <p>No staff members found.</p>
+    <?php endif; ?>
 
-<?php // phpcs:enable ?>
+    <?php // phpcs:enable ?>
 </div>

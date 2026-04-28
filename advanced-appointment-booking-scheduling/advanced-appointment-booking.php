@@ -3,7 +3,7 @@
 Plugin Name:       Advanced Appointment Booking & Scheduling
 Plugin URI:
 Description:       Advanced Appointment Booking & Scheduling: Effortlessly manage appointments with a simple, user-friendly scheduling system.
-Version:           2.2
+Version:           2.3
 Requires at least: 5.2
 Requires PHP:      7.2
 Author:            themespride
@@ -18,7 +18,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('ABP_VERSION', '2.2');
+define('ABP_VERSION', '2.3');
+define('ABP_AUTHOR', 'themespride');
 define('ABP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ABP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('ABP_LICENCE_API_ENDPOINT', 'https://license.themespride.com/api/general/');
@@ -174,9 +175,9 @@ add_action('admin_enqueue_scripts', 'abp_enqueue_admin_assets');
 function abp_enqueue_admin_assets()
 {
     $screen = get_current_screen();
-    $style_version = filemtime(plugin_dir_path(__FILE__) . 'assets/css/style.css');
+    $abp_banner_style_version = filemtime(plugin_dir_path(__FILE__) . 'assets/css/abp-banner-style.css');
 
-    wp_enqueue_style('abp-style', plugins_url('/assets/css/style.css', __FILE__), [], $style_version);
+    wp_enqueue_style('abp-banner-style', plugins_url('/assets/css/abp-banner-style.css', __FILE__), [], $abp_banner_style_version);
 
     wp_enqueue_script(
         'abp-admin-clean-url',
@@ -186,23 +187,30 @@ function abp_enqueue_admin_assets()
         true
     );
 
-    if ($screen->id == 'toplevel_page_appointment-booking-themes' || $screen->id == 'appointments_page_appointment-bookings') {
+    if ($screen->id == 'toplevel_page_appointment-booking-themes' || $screen->id == 'appointments_page_appointment-bookings' || $screen->id == 'appointments_page_appointment-booking-help') {
 
         $data = ".notice.is-dismissible {
             display: none;
         }";
 
-        wp_add_inline_style('abp-style', $data);
+        wp_add_inline_style('abp-banner-style', $data);
 
     }
 
     // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-    if (isset($_GET['page']) && ($_GET['page'] == 'appointment-booking-admin' || $_GET['page'] == 'appointment-bookings' || $_GET['page'] == 'appointment-booking-themes')) {
+    if (isset($_GET['page']) && ($_GET['page'] == 'appointment-booking-admin' || $_GET['page'] == 'appointment-bookings' || $_GET['page'] == 'appointment-booking-themes' || $_GET['page'] == 'appointment-booking-help')) {
 
         $style_version = filemtime(plugin_dir_path(__FILE__) . 'assets/css/style.css');
         $bootstrap_version = filemtime(plugin_dir_path(__FILE__) . 'assets/lib/bootstrap.js');
+        wp_enqueue_style('abp-style', plugins_url('/assets/css/style.css', __FILE__), [], $style_version);
         wp_enqueue_style('abp-bootstrap-css', plugins_url('/assets/lib/bootstrap.css', __FILE__), [], $style_version);
-        wp_enqueue_script('abp-bootstrap-js', plugins_url('/assets/lib/bootstrap.js', __FILE__), ['jquery'], $bootstrap_version, true);
+        wp_enqueue_script(
+            'abp-bootstrap-js',
+            plugins_url('/assets/lib/bootstrap.js', __FILE__),
+            [],
+            $bootstrap_version,
+            true
+        );
     }
 
 }
@@ -240,7 +248,8 @@ function abp_promo_admin_banner_notice()
                 <div class="abp-promo-banner-content">
                     <h3><?php echo esc_html('WordPress Theme Bundle'); ?></h3>
                     <p class="abp-promo-banner-info">
-                        <?php echo esc_html('Get 120+ Premium WordPress Themes for Just $89!'); ?></p>
+                        <?php echo esc_html('Get 120+ Premium WordPress Themes for Just $89!'); ?>
+                    </p>
                     <p class="abp-flash-code"><?php echo esc_html('Exclusive Flash Sale 🔥 Use Code: '); ?><strong
                             id="abp-coupon"><?php echo esc_html('FLASH25'); ?></strong></p>
                     <a href="<?php echo esc_attr(ABP_MAIN_URL . 'products/wordpress-theme-bundle'); ?>"

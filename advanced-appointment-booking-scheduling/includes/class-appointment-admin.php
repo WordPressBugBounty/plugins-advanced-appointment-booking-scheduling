@@ -1,5 +1,4 @@
 <?php
-// Exit if accessed directly.
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -79,6 +78,17 @@ class ABP_Admin
             'appointment-booking-themes',
             [$this, 'abp_render_admin_page']
         );
+
+        // Help submenu
+        add_submenu_page(
+            'appointment-booking-admin',
+            'Help',
+            'Help',
+            'manage_appointments',
+            'appointment-booking-help',
+            [$this, 'abp_render_help_page_admin']
+        );
+
     }
 
     function abp_register_staff_role()
@@ -133,7 +143,13 @@ class ABP_Admin
         <?php
     }
 
-    // submenu page
+    public function abp_render_help_page_admin()
+    {
+        include_once plugin_dir_path(__FILE__) . 'help.php';
+        abp_render_help_page();
+    }
+
+
     public function abp_render_bookings_page()
     {
 
@@ -222,8 +238,6 @@ class ABP_Admin
             wp_die('Invalid request.');
         }
 
-
-
         // phpcs:disable WordPress.DB.DirectDatabaseQuery
         global $wpdb;
         $service_id = isset($_POST['service_id']) ? sanitize_text_field(wp_unslash($_POST['service_id'])) : '';
@@ -268,9 +282,6 @@ class ABP_Admin
                 wp_safe_redirect(get_permalink($post1->ID));
                 exit;
             }
-
-
-
 
             // Insert appointment booking data
             $wpdb->insert(
@@ -466,38 +477,47 @@ class ABP_Admin
 
         ob_start();
 
+
         if ($bookings) {
-            echo '<ul class="meeting-lists">';
+            echo '<div class="abp-my-bookings">';
+            echo '<h3>Your Appointments</h3>';
+            echo '<div class="abp-bookings-list">';
             foreach ($bookings as $booking) {
                 // Sanitize and escape the fetched service name
                 $service_name = sanitize_text_field($wpdb->get_var($wpdb->prepare("SELECT service_name FROM {$wpdb->prefix}appointment_services WHERE id = %d", $booking->service_id)));
 
-                echo '<li>';
-                echo '<div class="schedule-data" style="display: inline;">';
-                echo esc_html($booking->service_id);
-                echo '.';
-                echo ' ' . esc_html($service_name);
-                echo ' | Date: ' . esc_html($booking->booking_date);
-                echo ' | Time: ' . esc_html($booking->booking_time);
-                echo ' | Status: ' . esc_html($booking->status);
+                $status_class = $booking->status === 'canceled' ? 'status-canceled' : 'status-' . $booking->status;
+                $status_label = ucfirst($booking->status);
+
+                echo '<div class="abp-booking-item">';
+                echo '<div class="abp-booking-details">';
+                echo '<div class="abp-service-name">' . esc_html($service_name) . '</div>';
+                echo '<div class="abp-booking-meta">';
+                echo '<span class="abp-meta-label">Date:</span> <span>' . esc_html($booking->booking_date) . '</span>';
+                echo '<span class="abp-meta-label">Time:</span> <span>' . esc_html($booking->booking_time) . '</span>';
                 echo '</div>';
+                echo '<div class="abp-booking-status ' . esc_attr($status_class) . '">' . esc_html($status_label) . '</div>';
+                echo '</div>'; // details
+
                 if ($booking->status !== 'canceled') {
-                    echo ' | <form method="POST" style="display:inline-block;">
-                            <input type="hidden" name="cancel_booking_id" value="' . esc_attr($booking->id) . '">';
+                    echo '<form method="POST" class="abp-cancel-form">';
+                    echo '<input type="hidden" name="cancel_booking_id" value="' . esc_attr($booking->id) . '">';
                     wp_nonce_field('book_appointment_action', 'book_appointment_nonce');
-                    echo '<input type="submit" value="' . esc_attr__('Cancel', 'advanced-appointment-booking') . '" class="button button-secondary" onclick="return confirm(\'' . esc_js(__('Are you sure you want to cancel this booking?', 'advanced-appointment-booking')) . '\');">
-                                    </form>';
-
-                } else {
-                    echo ' | <span style="color: red;">' . esc_html__('Canceled', 'advanced-appointment-booking') . '</span>';
+                    echo '<button type="submit" class="abp-cancel-btn" onclick="return confirm(\'' . esc_js(__('Are you sure you want to cancel this booking?', 'advanced-appointment-booking')) . '\');">';
+                    echo esc_html__('Cancel Booking', 'advanced-appointment-booking');
+                    echo '</button>';
+                    echo '</form>';
                 }
-
-                echo '</li>';
+                echo '</div>'; // item
             }
-            echo '</ul>';
+            echo '</div>'; // list
+            echo '</div>'; // container
         } else {
+            echo '<div class="abp-no-bookings">';
             echo '<p>' . esc_html__('No bookings found.', 'advanced-appointment-booking') . '</p>';
+            echo '</div>';
         }
+
 
         return ob_get_clean();
     }
@@ -774,8 +794,8 @@ class ABP_Admin
                         </td>
                         <td>
                             <input type="hidden" name="appointment_id" value="<?php echo esc_html($appointment->id); ?>">
-                            <button type="submit" name="update_appointment_status" class="button-primary">Update</button>
-                            <button type="submit" name="delete_appointment" class="button-secondary"
+                            <button type="submit" name="update_appointment_status" class="abp-btn-primary">Update</button>
+                            <button type="submit" name="delete_appointment" class="abp-btn-secondary"
                                 onclick="return confirm('Are you sure you want to delete this appointment?');">Delete</button>
                             </form>
                         </td>
