@@ -338,17 +338,19 @@ class ABP_Admin
 
         ob_start();
         ?>
-        <form action="" method="post">
-            <label for="email"><?php echo esc_html__('Email:', 'advanced-appointment-booking'); ?></label>
-            <input type="email" name="log" id="email" required />
+        <div class="abp-login-wrapper">
+            <form action="" method="post" class="abp-login-form">
+                <label for="email"><?php echo esc_html__('Email:', 'advanced-appointment-booking'); ?></label>
+                <input type="email" name="log" id="email" required />
 
-            <label for="password"><?php echo esc_html__('Password:', 'advanced-appointment-booking'); ?></label>
-            <input type="password" name="pwd" id="password" required />
+                <label for="password"><?php echo esc_html__('Password:', 'advanced-appointment-booking'); ?></label>
+                <input type="password" name="pwd" id="password" required />
 
-            <?php wp_nonce_field('appointment_login_action', 'appointment_login_nonce'); ?>
-            <input type="submit" name="appointment_login"
-                value="<?php echo esc_attr__('Login', 'advanced-appointment-booking'); ?>" />
-        </form>
+                <?php wp_nonce_field('appointment_login_action', 'appointment_login_nonce'); ?>
+                <input type="submit" name="appointment_login"
+                    value="<?php echo esc_attr__('Login', 'advanced-appointment-booking'); ?>" />
+            </form>
+        </div>
         <?php
 
         if (isset($_POST['appointment_login'])) {
@@ -391,18 +393,27 @@ class ABP_Admin
         }
         ob_start();
         ?>
-        <form action="" method="post">
-            <label for="full_name">Full Name:</label>
-            <input type="text" name="full_name" id="full_name" required />
-            <label for="username">Username:</label>
-            <input type="text" name="username" id="username" required />
-            <label for="email">Email:</label>
-            <input type="email" name="email" id="email" required />
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password" required />
-            <?php wp_nonce_field('appointment_register_action', 'appointment_register_nonce'); ?>
-            <input type="submit" name="appointment_register" value="Register" />
-        </form>
+        <div class="abp-register-wrapper">
+            <form action="" method="post" class="abp-register-form">
+
+                <label for="full_name">Full Name:</label>
+                <input type="text" name="full_name" id="full_name" required />
+
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" required />
+
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" required />
+
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" required />
+
+                <?php wp_nonce_field('appointment_register_action', 'appointment_register_nonce'); ?>
+
+                <input type="submit" name="appointment_register" value="Register" />
+
+            </form>
+        </div>
         <?php
 
         if (isset($_POST['appointment_register'])) {

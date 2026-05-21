@@ -467,3 +467,178 @@ input[type="password"] {
     padding: 40px 20px;
 }
 
+
+
+/* Wrapper */
+.abp-login-wrapper {
+    max-width: 420px;
+    margin: 40px auto;
+    padding: 35px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-top: 5px solid #0056b3;
+}
+
+/* Form */
+.abp-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Labels */
+.abp-login-form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0d47a1;
+    margin-bottom: -10px;
+}
+
+/* Inputs */
+.abp-login-form input[type="email"],
+.abp-login-form input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d6e4f5;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #f8fbff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Input Focus */
+.abp-login-form input[type="email"]:focus,
+.abp-login-form input[type="password"]:focus {
+    border-color: #0056b3;
+    background: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.12);
+}
+
+/* Button */
+.abp-login-form input[type="submit"] {
+    background: linear-gradient(135deg, #0056b3 0%, #004494 100%);
+    color: #ffffff;
+    border: none;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+/* Button Hover */
+.abp-login-form input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 86, 179, 0.25);
+}
+
+/* Messages */
+.abp-login-wrapper p {
+    font-size: 14px;
+    margin-top: 15px;
+    color: #d32f2f;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .abp-login-wrapper {
+        padding: 25px 20px;
+        margin: 20px;
+    }
+}
+
+
+
+/* =========================================
+   REGISTER FORM WRAPPER
+========================================= */
+.abp-register-wrapper {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 35px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-top: 5px solid #0056b3;
+}
+
+/* =========================================
+   REGISTER FORM
+========================================= */
+.abp-register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Labels */
+.abp-register-form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0d47a1;
+    margin-bottom: -10px;
+}
+
+/* Inputs */
+.abp-register-form input[type="text"],
+.abp-register-form input[type="email"],
+.abp-register-form input[type="password"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #d6e4f5;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #f8fbff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* Focus Effect */
+.abp-register-form input[type="text"]:focus,
+.abp-register-form input[type="email"]:focus,
+.abp-register-form input[type="password"]:focus {
+    border-color: #0056b3;
+    background: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.12);
+}
+
+/* Submit Button */
+.abp-register-form input[type="submit"] {
+    background: linear-gradient(135deg, #0056b3 0%, #004494 100%);
+    color: #ffffff;
+    border: none;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+/* Hover */
+.abp-register-form input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 86, 179, 0.25);
+}
+
+/* Messages */
+.abp-register-wrapper p {
+    font-size: 14px;
+    margin-top: 15px;
+    color: #d32f2f;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .abp-register-wrapper {
+        padding: 25px 20px;
+        margin: 20px;
+    }
+}
