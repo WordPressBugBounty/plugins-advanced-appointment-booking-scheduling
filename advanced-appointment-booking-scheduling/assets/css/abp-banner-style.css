@@ -35,13 +35,13 @@ p.abp-flash-code {
 
 .abp-promo-banner-content a {
     background-color: #6C4624;
-    color: white;
+    color: white !important;
     padding: 14px 26px;
     display: inline-block;
     margin-top: 7px;
     border-radius: 6px;
     text-transform: uppercase;
-    text-decoration: none;
+    text-decoration: none !important;
     font-weight: 400;
     font-family: 'Bebas Neue', sans-serif;
     font-size: 30px;

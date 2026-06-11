@@ -3,7 +3,7 @@
 Plugin Name:       Advanced Appointment Booking & Scheduling
 Plugin URI:
 Description:       Advanced Appointment Booking & Scheduling: Effortlessly manage appointments with a simple, user-friendly scheduling system.
-Version:           2.4
+Version:           2.5
 Requires at least: 5.2
 Requires PHP:      7.2
 Author:            themespride
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('ABP_VERSION', '2.4');
+define('ABP_VERSION', '2.5');
 define('ABP_AUTHOR', 'themespride');
 define('ABP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ABP_PLUGIN_URL', plugin_dir_url(__FILE__));
