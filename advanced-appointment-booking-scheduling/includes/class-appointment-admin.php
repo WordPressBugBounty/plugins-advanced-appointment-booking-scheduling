@@ -253,15 +253,13 @@ class ABP_Admin
         if ($service) {
             $price = $service->price;
 
-            // * Any staff mapped to this service already booked?
+            // Is this service already booked for the selected date/time?
             $conflict = $wpdb->get_var(
                 $wpdb->prepare(
                     "
                     SELECT COUNT(*)
                     FROM {$wpdb->prefix}appointment_booking b
-                    INNER JOIN {$wpdb->prefix}abp_staff_services ss
-                        ON b.service_id = ss.service_id
-                    WHERE ss.service_id = %d
+                    WHERE b.service_id = %d
                     AND b.booking_date = %s
                     AND b.booking_time = %s
                     AND b.status IN ('pending','confirmed')
@@ -710,6 +708,26 @@ class ABP_Admin
             return;
         }
 
+        $is_staff = in_array('staff', (array) $current_user->roles, true);
+
+        // Restrict staff to appointments for services assigned to them; admins can act on any appointment.
+        $abp_staff_owns_appointment = function ($appointment_id) use ($wpdb, $current_user) {
+            $owned_id = $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                    SELECT ab.id
+                    FROM {$wpdb->prefix}appointment_booking ab
+                    INNER JOIN {$wpdb->prefix}abp_staff_services ss ON ab.service_id = ss.service_id
+                    INNER JOIN {$wpdb->prefix}abp_staff st ON ss.staff_id = st.id
+                    WHERE ab.id = %d AND st.user_id = %d
+                    ",
+                    $appointment_id,
+                    $current_user->ID
+                )
+            );
+            return (int) $owned_id === (int) $appointment_id;
+        };
+
         if (isset($_POST['update_appointment_status']) && isset($_POST['appointment_id']) && isset($_POST['appointment_status'])) {
 
             // Verify nonce
@@ -718,7 +736,16 @@ class ABP_Admin
             }
 
             $appointment_id = intval($_POST['appointment_id']);
+            $allowed_statuses = ['pending', 'approved', 'canceled'];
             $new_status = sanitize_text_field(wp_unslash($_POST['appointment_status']));
+
+            if (!in_array($new_status, $allowed_statuses, true)) {
+                wp_die('Invalid status.');
+            }
+
+            if ($is_staff && !$abp_staff_owns_appointment($appointment_id)) {
+                wp_die('You are not allowed to modify this appointment.');
+            }
 
             $wpdb->update(
                 $appointments_table,
@@ -732,7 +759,17 @@ class ABP_Admin
         }
 
         if (isset($_POST['delete_appointment']) && isset($_POST['appointment_id'])) {
+
+            // Verify nonce
+            if (!isset($_POST['appointment_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['appointment_nonce'])), 'update_appointment_status_nonce')) {
+                die('Nonce verification failed.');
+            }
+
             $appointment_id = intval($_POST['appointment_id']);
+
+            if ($is_staff && !$abp_staff_owns_appointment($appointment_id)) {
+                wp_die('You are not allowed to delete this appointment.');
+            }
 
             $wpdb->delete(
                 $appointments_table,
@@ -743,7 +780,7 @@ class ABP_Admin
             echo '<div class="updated notice is-dismissible"><p>Appointment deleted successfully.</p></div>';
         }
 
-        if (in_array('staff', (array) $current_user->roles)) {
+        if ($is_staff) {
             // Show only staff's own appointments
             $appointments = $wpdb->get_results(
                 $wpdb->prepare(

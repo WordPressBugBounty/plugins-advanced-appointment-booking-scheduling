@@ -8,6 +8,12 @@ function abp_handle_fetch_api()
 {
     header('Content-Type: application/json');
 
+    if (!is_user_logged_in() || !current_user_can('manage_appointments')) {
+        http_response_code(403);
+        echo wp_json_encode(['error' => 'Unauthorized']);
+        exit;
+    }
+
     if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo wp_json_encode(['error' => 'Invalid request method']);
         exit;

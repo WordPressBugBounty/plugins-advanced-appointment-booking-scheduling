@@ -139,6 +139,12 @@ if (isset($_POST['abp_add_staff']) || isset($_POST['abp_update_staff'])) {
 */
 if (!empty($_GET['delete_staff']) && is_numeric($_GET['delete_staff'])) {
 
+    check_admin_referer('abp_delete_staff_action');
+
+    if (!current_user_can('manage_appointments')) {
+        wp_die('You are not allowed to delete staff.');
+    }
+
     $staff_id = intval(wp_unslash($_GET['delete_staff']));
 
     $wpdb->delete($staff_services, ['staff_id' => $staff_id]);
@@ -329,7 +335,7 @@ $current_tab = isset($_GET['tab'])
                         <td>
                             <a href="<?php echo esc_url(add_query_arg(['tab' => 'staff', 'edit_staff' => $staff->id])); ?>"
                                 class="abp-btn-primary">Edit</a>
-                            <a href="<?php echo esc_url(add_query_arg(['tab' => 'staff', 'delete_staff' => $staff->id])); ?>"
+                            <a href="<?php echo esc_url(wp_nonce_url(add_query_arg(['tab' => 'staff', 'delete_staff' => $staff->id]), 'abp_delete_staff_action')); ?>"
                                 class="abp-btn-secondary"
                                 onclick="return confirm('Are you sure you want to delete this staff member?');">
                                 Delete

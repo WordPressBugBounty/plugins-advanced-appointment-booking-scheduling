@@ -57,7 +57,11 @@ if (isset($_GET['tab']) && $_GET['tab'] === 'services' && isset($_GET['added']) 
 // Handle service deletion
 if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_service_id'])) {
     if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'delete_service')) {
-        // wp_die('Nonce verification failed');
+        wp_die('Nonce verification failed');
+    }
+
+    if (!current_user_can('manage_appointments')) {
+        wp_die('You are not allowed to delete services.');
     }
 
     $service_id = intval($_POST['delete_service_id']);

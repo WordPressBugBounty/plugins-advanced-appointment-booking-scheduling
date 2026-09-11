@@ -2,9 +2,9 @@
 Contributors: themespride
 Tags: booking system, appointments, booking, scheduling, appointment booking
 Requires at least: 5.2
-Tested up to: 7.0
-Requires PHP: 7.2
-Stable tag: 2.5
+Tested up to: 7.1
+Requires PHP: 7.4
+Stable tag: 2.6
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,14 @@ All themes are designed with compatibility in mind, allowing seamless integratio
 
 
 == Changelog ==
+
+= 2.6 - 2026-11-09 =
+* Security: Added missing CSRF nonce checks on appointment deletion and staff deletion.
+* Security: Fixed a nonce check on service deletion that was not actually enforced.
+* Security: Restricted staff users to updating/deleting only appointments for their own assigned services.
+* Security: Restricted the theme browser API endpoint to logged-in users with appointment management access.
+* Fixed: Double-booking prevention now applies to services even before staff are assigned to them.
+* Fixed: A broken database migration query that could prevent the staff table from updating correctly.
 
 = 2.5 - 2026-11-06 =
 * Minor bug fixes and improvements.

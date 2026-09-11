@@ -3,9 +3,9 @@
 Plugin Name:       Advanced Appointment Booking & Scheduling
 Plugin URI:
 Description:       Advanced Appointment Booking & Scheduling: Effortlessly manage appointments with a simple, user-friendly scheduling system.
-Version:           2.5
+Version:           2.6
 Requires at least: 5.2
-Requires PHP:      7.2
+Requires PHP:      7.4
 Author:            themespride
 Author URI:        https://www.themespride.com/
 Text Domain:       advanced-appointment-booking
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('ABP_VERSION', '2.5');
+define('ABP_VERSION', '2.6');
 define('ABP_AUTHOR', 'themespride');
 define('ABP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ABP_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -110,17 +110,22 @@ register_activation_hook(__FILE__, 'abp_create_staff_table');
 function abp_alter_user_id_staff_table()
 {
     global $wpdb;
-    $table_name = $wpdb->prefix . 'abp_staff';
+    $table_name = esc_sql($wpdb->prefix . 'abp_staff');
 
     if (get_option('abp_staff_userid_column_added')) {
         return;
     }
 
-    $row = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM %s LIKE %s", $table_name, 'user_id'));
+    // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+    $row = $wpdb->get_results($wpdb->prepare("SHOW COLUMNS FROM {$table_name} LIKE %s", 'user_id'));
     if (empty($row)) {
-        $wpdb->query($wpdb->prepare("ALTER TABLE %s ADD COLUMN user_id BIGINT(20) UNSIGNED NULL AFTER id", $table_name));
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN user_id BIGINT(20) UNSIGNED NULL AFTER id");
     }
-    update_option('abp_staff_userid_column_added', 1);
+
+    if (!empty($row) || $wpdb->last_error === '') {
+        update_option('abp_staff_userid_column_added', 1);
+    }
 }
 add_action('plugins_loaded', 'abp_alter_user_id_staff_table');
 
